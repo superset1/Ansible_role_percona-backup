@@ -1,0 +1,8 @@
+---
+
+- name: Restart Percona Backup MongoDB Systemd Service
+  systemd:
+    name: pbm-agent
+    state: restarted
+    enabled: true
+    daemon_reload: true

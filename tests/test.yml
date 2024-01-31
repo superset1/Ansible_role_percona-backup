@@ -1,0 +1,8 @@
+---
+
+- name: Percona Backup For MongoDB
+  hosts: ~mongo, !mongos_servers
+  become: true
+  any_errors_fatal: true
+  roles:
+    - percona-backup

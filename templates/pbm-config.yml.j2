@@ -1,0 +1,26 @@
+#jinja2: lstrip_blocks: "True"
+pitr:
+  enabled: {{ (perconabackup_pitr_enabled if perconabackup_type == 'physical' else false) | to_nice_json }}
+  oplogOnly: {{ perconabackup_pitr_config.oplogOnly | to_nice_json }}
+  oplogSpanMin: {{ perconabackup_pitr_config.oplogSpanMin }}
+  compression: {{ perconabackup_pitr_config.compression }}
+  compressionLevel: {{ perconabackup_pitr_config.compressionLevel }}
+
+storage:
+  type: {{ perconabackup_storage_type }}
+  {{ perconabackup_storage_type }}:
+    {% if perconabackup_storage_type == 's3' %}
+    region: {{ perconabackup_storage_s3_config.region }}
+    bucket: {{ perconabackup_storage_s3_config.bucket }}
+    prefix: {{ perconabackup_storage_s3_config.path }}
+    endpointUrl: {{ perconabackup_storage_s3_config.endpoint }}
+    credentials:
+      access-key-id: {{ perconabackup_storage_s3_config.access_key }}
+      secret-access-key: {{ perconabackup_storage_s3_config.secret_key }}
+    {% if perconabackup_storage_s3_config.debugLogLevels is defined and perconabackup_storage_s3_config.debugLogLevels | length > 0 %}
+    debugLogLevels: {{ perconabackup_storage_s3_config.debugLogLevels }}
+    {% endif %}
+    {% endif %}
+    {% if perconabackup_storage_type == 'filesystem' %}
+    path: {{ perconabackup_storage_filesystem.path }}
+    {% endif %}

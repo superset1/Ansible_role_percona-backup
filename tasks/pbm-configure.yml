@@ -1,0 +1,93 @@
+---
+
+- name: Create Percona Config Directory '{{ perconabackup_config_directory }}'
+  file:
+    path: "{{ perconabackup_config_directory }}"
+    state: directory
+    owner: "{{ perconabackup_linux_user }}"
+    group: "{{ perconabackup_linux_group }}"
+    mode: 0755
+  tags: [perconabackup, perconabackup-configure]
+
+- name: Add Percona Backup MongoDB Environment Variable 'PBM_MONGODB_URI' To '{{ perconabackup_env_file }}'
+  copy:
+    dest: "{{ perconabackup_env_file }}"
+    content: "{{ perconabackup_mongodb_uri }}"
+    owner: "{{ perconabackup_linux_user }}"
+    group: "{{ perconabackup_linux_group }}"
+  notify:
+    - Restart Percona Backup MongoDB Systemd Service
+  tags: [perconabackup, perconabackup-configure]
+
+- name: Add Source Percona Backup MongoDB Environment Variable File '{{ perconabackup_env_file }}' In '/etc/profile'
+  blockinfile:
+    path: /etc/profile
+    block: |
+      set -a
+      source {{ perconabackup_env_file }}
+      set +a
+  tags: [perconabackup, perconabackup-configure]
+
+- name: Configure Percona Backup MongoDB
+  template:
+    src: pbm-config.yml.j2
+    dest: "{{ perconabackup_config_file }}"
+    backup: true
+    owner: "{{ perconabackup_linux_user }}"
+    group: "{{ perconabackup_linux_group }}"
+    mode: 0644
+  notify:
+    - Restart Percona Backup MongoDB Systemd Service
+  tags: [perconabackup, perconabackup-configure]
+
+- name: Create Percona Backup MongoDB Systemd Service File
+  template:
+    src: pbm-agent.service.j2
+    dest: "{{ perconabackup_service_file }}"
+    mode: 0644
+    backup: true
+  notify:
+    - Restart Percona Backup MongoDB Systemd Service
+  tags: [perconabackup, perconabackup-configure]
+
+- name: Create Percona Backup MongoDB Log File
+  file:
+    path: "{{ perconabackup_log_path }}"
+    state: touch
+    access_time: preserve
+    modification_time: preserve
+    owner: "{{ perconabackup_linux_user }}"
+    group: "{{ perconabackup_linux_group }}"
+  tags: [perconabackup, perconabackup-configure]
+
+- name: Configure Percona Backup MongoDB Logrotate
+  copy:
+    dest: "{{ perconabackup_logrotate_path }}"
+    content: |
+      {{ perconabackup_log_path }}
+      {
+        {{ perconabackup_logrotate_config.period }}
+        size {{ perconabackup_logrotate_config.size }}
+        rotate {{ perconabackup_logrotate_config.rotate }}
+        create 640 {{ perconabackup_linux_user }} {{ perconabackup_linux_group }}
+        missingok
+        compress
+        delaycompress
+        notifempty
+        copytruncate
+      }
+    mode: 0644
+    owner: "root"
+    group: "root"
+  tags: [perconabackup, perconabackup-configure]
+
+- name: Create S3 Bucket '{{ perconabackup_storage_s3_config.bucket }}' If 'perconabackup_storage_type == s3'
+  run_once: true
+  amazon.aws.s3_bucket:
+    access_key: "{{ perconabackup_storage_s3_config.access_key }}"
+    secret_key: "{{ perconabackup_storage_s3_config.secret_key }}"
+    endpoint_url: "{{ perconabackup_storage_s3_config.endpoint }}"
+    name: "{{ perconabackup_storage_s3_config.bucket }}"
+    state: present
+  when: perconabackup_storage_type == 's3'
+  tags: [perconabackup, perconabackup-configure]

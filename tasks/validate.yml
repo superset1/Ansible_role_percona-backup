@@ -1,0 +1,47 @@
+---
+
+- name: Check That OS Family Debian Or RedHat
+  assert:
+    quiet: true
+    that:
+      -  ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+    fail_msg: "OS family must be Debian or RedHat! Now is {{ ansible_os_family }}."
+  tags: [perconabackup, perconabackup-validate, perconabackup-configure, perconabackup-install]
+
+- name: Check That 'perconabackup_mongodb_password' Or 'mongodb_root_backup_password' Is Not Empty
+  assert:
+    quiet: true
+    that:
+      - perconabackup_mongodb_password is defined
+      - perconabackup_mongodb_password | length > 0
+    fail_msg: "Variable 'perconabackup_mongodb_password' or 'mongodb_root_backup_password' must contain the password!"
+  tags: [perconabackup, perconabackup-validate, perconabackup-configure, perconabackup-install]
+
+
+- name: Check That 'perconabackup_storage_s3_config.endpoint' Variable Contains Scheme If 'perconabackup_storage_type == s3'
+  assert:
+    quiet: true
+    that:
+      -  perconabackup_storage_s3_config.endpoint | regex_search("^https?://.+$")
+    fail_msg: "Variable 'perconabackup_storage_s3_config.endpoint' must contain the http or https scheme!"
+  when: perconabackup_storage_type == 's3'
+  tags: [perconabackup, perconabackup-validate, perconabackup-configure, perconabackup-install]
+
+- name: Check That 'perconabackup_storage_s3_config' Is Filled In Correctly
+  assert:
+    quiet: true
+    that:
+      -  perconabackup_storage_s3_config.bucket is defined and perconabackup_storage_s3_config.bucket | length > 0
+      -  perconabackup_storage_s3_config.endpoint is defined and perconabackup_storage_s3_config.endpoint | length > 0
+      -  perconabackup_storage_s3_config.access_key is defined and perconabackup_storage_s3_config.access_key | length > 0
+      -  perconabackup_storage_s3_config.secret_key is defined and perconabackup_storage_s3_config.secret_key | length > 0
+    fail_msg: "Dictionary 'perconabackup_storage_s3_config' is not filled in correctly!"
+  when: perconabackup_storage_type == 's3'
+  tags: [perconabackup, perconabackup-validate, perconabackup-configure, perconabackup-install]
+
+- name: Check Installed Percona Backup MongoDB Version
+  shell: "pbm-agent version --short"
+  failed_when: false
+  changed_when: _perconabackup_exists_version.stdout != perconabackup_version
+  register: _perconabackup_exists_version
+  tags: [perconabackup, perconabackup-validate, perconabackup-configure, perconabackup-install]

@@ -1,0 +1,41 @@
+---
+# vars file for percona-backup
+
+perconabackup_release_url: "{{ 'https://repo.percona.com/apt/percona-release_latest.generic_all.deb' if ansible_os_family == 'Debian' else 'https://repo.percona.com/yum/percona-release-latest.noarch.rpm' }}"
+
+perconabackup_linux_user: "{{ mongodb_user | default('mongod' if (ansible_os_family == 'RedHat') else 'mongodb') }}"
+perconabackup_linux_group: "{{ mongodb_group | default('mongod' if (ansible_os_family == 'RedHat') else 'mongodb') }}"
+
+perconabackup_config_directory: "/etc/percona"
+perconabackup_config_file: "{{ perconabackup_config_directory }}/pbm-config.yml"
+perconabackup_daemon_name: "pbm-agent"
+perconabackup_env_file: "{{ perconabackup_config_directory }}/{{ perconabackup_daemon_name }}-env"
+perconabackup_service_file: "/lib/systemd/system/{{ perconabackup_daemon_name }}.service"
+
+perconabackup_log_path: "/var/log/{{ perconabackup_daemon_name }}.log"
+perconabackup_logrotate_path: "/etc/logrotate.d/{{ perconabackup_daemon_name }}"
+
+perconabackup_pip_requirements:
+  - botocore>1.33
+  - boto3>1.33
+  - packaging
+
+# Local Storage
+perconabackup_storage_filesystem:
+  path: /backups/percona
+# Local Storage
+
+perconabackup_mongodb_user: "{{ mongodb_root_backup_name | default('mongobackup') }}"
+perconabackup_mongodb_password: "{{ mongodb_root_backup_password }}"
+perconabackup_mongodb_uri: >
+  PBM_MONGODB_URI="{{ 'mongodb://' + perconabackup_mongodb_user + ':' + perconabackup_mongodb_password + '@127.0.0.1:' +  mongodb_net_port|default('27017') + '/?authSource=admin' +
+   (('&tls=true&tlsCertificateKeyFile=' + mongodb_net_tls_certificateKeyFile_path +
+   (('&tlsCertificateKeyFilePassword=' + mongodb_net_tls_config['certificateKeyFilePassword'])
+   if mongodb_net_tls_config['certificateKeyFilePassword'] is defined and mongodb_net_tls_config['certificateKeyFilePassword']|length > 0 else '') +
+   '&tlsCAFile=' + mongodb_net_tls_CAFile_path + (('&tlsCRLFile=' + mongodb_net_tls_config['tlsCRLFile'])
+   if mongodb_net_tls_config['tlsCRLFile'] is defined and mongodb_net_tls_config['tlsCRLFile']|length > 0 else '') +
+   (('&allowInvalidCertificates=' + mongodb_net_tls_config['allowInvalidCertificates'])
+   if mongodb_net_tls_config['allowInvalidCertificates'] is defined and mongodb_net_tls_config['allowInvalidCertificates'] else '') +
+   (('&allowInvalidHostnames=' + mongodb_net_tls_config['allowInvalidHostnames'])
+   if mongodb_net_tls_config['allowInvalidHostnames'] is defined and mongodb_net_tls_config['allowInvalidHostnames'] else ''))
+   if mongodb_net_tls_enabled is defined and mongodb_net_tls_enabled else '') }}"

@@ -1,0 +1,27 @@
+---
+
+- name: "{{ perconabackup_crontab_backup_enabled | ternary('Configure', 'Delete') }} Backup Schedule For Percona Backup MongoDB"
+  cron:
+    name: "Percona Backup {{ service_name }}"
+    minute: "{{ perconabackup_crontab_backup_schedule.minute }}"
+    hour: "{{ perconabackup_crontab_backup_schedule.hour }}"
+    day: "{{ perconabackup_crontab_backup_schedule.day }}"
+    month: "{{ perconabackup_crontab_backup_schedule.month }}"
+    weekday: "{{ perconabackup_crontab_backup_schedule.weekday }}"
+    user: "{{ perconabackup_linux_user }}"
+    job: ". {{ perconabackup_env_file }} && export PBM_MONGODB_URI && /usr/bin/pbm backup --type={{ perconabackup_type }}"
+    state: "{{ perconabackup_crontab_backup_enabled | ternary('present', 'absent') }}"
+  tags: [perconabackup, perconabackup-crontab]
+
+- name: "{{ perconabackup_crontab_cleanup_enabled | ternary('Configure', 'Delete') }} Cleanup Schedule For Percona Backup MongoDB"
+  cron:
+    name: "Percona Cleanup {{ service_name }}"
+    minute: "{{ perconabackup_crontab_cleanup_schedule.minute }}"
+    hour: "{{ perconabackup_crontab_cleanup_schedule.hour }}"
+    day: "{{ perconabackup_crontab_cleanup_schedule.day }}"
+    month: "{{ perconabackup_crontab_cleanup_schedule.month }}"
+    weekday: "{{ perconabackup_crontab_cleanup_schedule.weekday }}"
+    user: "{{ perconabackup_linux_user }}"
+    job: ". {{ perconabackup_env_file }} && export PBM_MONGODB_URI && [ $(/usr/bin/pbm list -o json | jq '.snapshots | length') -gt {{ perconabackup_retention_days }} ] && /usr/bin/pbm cleanup -y --older-than {{ perconabackup_retention_days }}d --wait"
+    state: "{{ perconabackup_crontab_cleanup_enabled | ternary('present', 'absent') }}"
+  tags: [perconabackup, perconabackup-crontab]

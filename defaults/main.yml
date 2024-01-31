@@ -1,0 +1,66 @@
+---
+
+perconabackup_enabled: true # Enable Percona Backup for MongoDB
+
+perconabackup_version: 2.3.1 # Version of Percona Backup for MongoDB
+
+perconabackup_type: "{{ 'physical' if mongodb_percona is defined and mongodb_percona else 'logical' }}" # 'logical' - for MongoDB Community, 'physical' - for Percona Server Mongodb and MongoDB Community
+perconabackup_initial_backup: true # Make an initial backup immediately after installing Percona Backup for MongoDB. It's need for pitr. If false, wait for the crontab schedule.
+perconabackup_force_install: false # Force reinstall Percona Backup for MongoDB if there are problems
+
+perconabackup_logrotate_config:
+  period: "daily"
+  size: "100M"
+  rotate: 7
+  postrotate: "/bin/kill -SIGUSR1 $(pidof {{ perconabackup_daemon_name }}) && rm -f {{ perconabackup_log_path }}.20*"
+
+perconabackup_pitr_enabled: true # Enables point-in-time recovery
+perconabackup_pitr_config:
+  oplogOnly: false # Controls whether the base backup is required to start Point-in-Time recovery oplog slicing. When set to true, Percona Backup for MongoDB saves oplog chunks without the base backup snapshot.
+  oplogSpanMin: 10 # The duration of an oplog span in minutes. If set when the pbm-agent is making an oplog slice, the slice’s span is updated right away.
+  compression: "s2" # The compression method for Point-in-Time Recovery oplog slices. (gzip, snappy, lz4, s2, pgzip, zstd. Default: s2)
+  compressionLevel: 2 # The compression level is from 0 till 10. https://docs.percona.com/percona-backup-mongodb/reference/pitr-options.html#pitrcompressionlevel
+
+perconabackup_retention_days: "{{ 14 if project_env == 'prd' else 7 }}" # Backup storage duration
+
+perconabackup_storage_type: "s3" # 's3' - for remote s3 storage, 'filesystem' - for remote filesystem server storage (NOT Local Path!!!) https://docs.percona.com/percona-backup-mongodb/details/storage-configuration.html#remote-filesystem-server-storage
+
+# S3 Storage
+perconabackup_storage_s3_config: # Optional dict, when 'perconabackup_storage_type == s3'
+  bucket: ""
+  region: "eu"
+  path: "percona-backups"
+  access_key: ""
+  secret_key: ""
+  endpoint: ""
+  debugLogLevels: "" # [Oprional] Enables S3 debug logging for different types of S3 requests: LogDebug, Signing, HTTPBody, RequestRetries, RequestErrors, EventStreamBody. To specify several event types, separate them by comma
+# S3 Storage
+
+perconabackup_crontab_backup_enabled: true
+perconabackup_crontab_backup_schedule:
+  minute: "0"
+  hour: "1"
+  day: "*"
+  month: "*"
+  weekday: "*"
+
+perconabackup_crontab_cleanup_enabled: true
+perconabackup_crontab_cleanup_schedule:
+  minute: "0"
+  hour: "3"
+  day: "*"
+  month: "*"
+  weekday: "*"
+
+# MongoDB Default Variables From MongoDB Role
+mongodb_net_ssl_PEMKeyFile_path: "{{ mongodb_net_tls_certificateKeyFile_path }}"
+mongodb_net_ssl_CAFile_path: "{{ mongodb_net_tls_CAFile_path }}"
+mongodb_net_ssl_CRLFile_path: "{{ mongodb_net_tls_CRLFile_path }}"
+mongodb_net_ssl_clusterFile_path: "{{ mongodb_net_tls_clusterFile_path }}"
+mongodb_net_ssl_clusterCAFile_path: "{{ mongodb_net_tls_clusterCAFile_path }}"
+mongodb_net_tls_certificateKeyFile_path: /etc/ssl/mongodb.pem
+mongodb_net_tls_CAFile_path: /etc/ssl/mongodb-ca.pem
+mongodb_net_tls_CRLFile_path: /etc/ssl/mongodb-crl.pem
+mongodb_net_tls_clusterFile_path: /etc/ssl/mongodb-cluster.pem
+mongodb_net_tls_clusterCAFile_path: /etc/ssl/mongodb-cluster-ca.pem
+# MongoDB Default Variables From MongoDB Role

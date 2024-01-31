@@ -1,0 +1,4 @@
+[mongo_cluster]
+mongo_host_1
+mongo_host_2
+mongo_host_3

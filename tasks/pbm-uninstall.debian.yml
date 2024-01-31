@@ -1,0 +1,64 @@
+---
+
+- name: Delete Backup Schedule For Percona Backup MongoDB
+  cron:
+    name: "Percona Backup {{ service_name }}"
+    user: "{{ perconabackup_linux_user }}"
+    state: absent
+  tags: [never, perconabackup-uninstall]
+
+- name: Delete Cleanup Schedule For Percona Backup MongoDB
+  cron:
+    name: "Percona Cleanup {{ service_name }}"
+    user: "{{ perconabackup_linux_user }}"
+    state: absent
+  tags: [never, perconabackup-uninstall]
+
+- name: Stop Percona Backup MongoDB Systemd Service
+  failed_when: false
+  systemd:
+    name: pbm-agent.service
+    state: stopped
+    enabled: false
+    daemon_reload: true
+  tags: [never, perconabackup-uninstall]
+
+- name: Delete Percona Backup MongoDB Systemd Service File
+  file:
+    path: "{{ perconabackup_service_file }}"
+    state: absent
+  tags: [never, perconabackup-uninstall]
+
+- name: Delete Percona Config Directory '{{ perconabackup_config_directory }}'
+  file:
+    path: "{{ perconabackup_config_directory }}"
+    state: absent
+  tags: [never, perconabackup-uninstall]
+
+- name: Delete Source Percona Backup MongoDB Environment Variable File '{{ perconabackup_env_file }}' From '/etc/profile'
+  blockinfile:
+    path: /etc/profile
+    block: |
+      set -a
+      source {{ perconabackup_env_file }}
+      set +a
+    state: absent
+  tags: [never, perconabackup-uninstall]
+
+- name: Delete Percona Backup MongoDB Logrotate
+  file:
+    path: "{{ perconabackup_logrotate_path }}"
+    state: absent
+  tags: [never, perconabackup-uninstall]
+
+- name: Delete Percona Backup MongoDB Log File
+  file:
+    path: "{{ perconabackup_log_path }}"
+    state: absent
+  tags: [never, perconabackup-uninstall]
+
+- name: Uninstall Percona Backup MongoDB
+  apt:
+    name: "percona-backup-mongodb"
+    state: "absent"
+  tags: [never, perconabackup-uninstall]

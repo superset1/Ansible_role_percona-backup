@@ -1,0 +1,33 @@
+---
+
+- block:
+  - name: Include Percona Backup MongoDB Validation Tasks If Not Arbiter or Not Mongos
+    include_tasks: "validate.yml"
+    tags: [perconabackup, perconabackup-validate, perconabackup-configure, perconabackup-install]
+
+  - name: Include Percona Backup MongoDB Installation Tasks If Not Arbiter or Not Mongos
+    include_tasks: "pbm-install.{{ ansible_os_family | lower }}.yml"
+    when: _perconabackup_exists_version.stdout != perconabackup_version or perconabackup_force_install
+    tags: [perconabackup, perconabackup-install]
+
+  - name: Include Percona Backup MongoDB Configuration Tasks If Not Arbiter or Not Mongos
+    include_tasks: "pbm-configure.yml"
+    tags: [perconabackup, perconabackup-configure]
+
+  - name: Include Percona Backup MongoDB Shedule Tasks If Not Arbiter or Not Mongos
+    include_tasks: "pbm-schedule.yml"
+    tags: [perconabackup, perconabackup-crontab]
+
+  when:
+    - perconabackup_enabled is defined
+    - perconabackup_enabled
+    - mongodb_arbiter is undefined or not mongodb_arbiter
+    - "'mongos_servers' not in group_names"
+  tags: [perconabackup]
+
+- name: Include Percona Backup MongoDB Uninstallation Tasks If Not Arbiter or Not Mongos
+  include_tasks: "pbm-uninstall.{{ ansible_os_family | lower }}.yml"
+  when:
+    - mongodb_arbiter is undefined or not mongodb_arbiter
+    - "'mongos_servers' not in group_names"
+  tags: [never, perconabackup-uninstall]

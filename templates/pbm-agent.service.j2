@@ -1,0 +1,25 @@
+#jinja2: lstrip_blocks: "True"
+[Unit]
+Description=Percona Backup Agent For MongoDB
+Documentation=https://docs.percona.com/
+After=network.target
+
+[Service]
+RestartSec=5s
+Restart=on-failure
+EnvironmentFile=-{{ perconabackup_env_file }}
+Type=simple
+User={{ perconabackup_linux_user }}
+Group={{ perconabackup_linux_group }}
+PermissionsStartOnly=true
+ExecStartPre=/usr/bin/pbm config --file {{ perconabackup_config_file }}
+ExecStart=/usr/bin/pbm-agent
+{% if perconabackup_initial_backup %}
+ExecStartPost=/bin/bash -c "sleep 60 && . {{ perconabackup_env_file }} && [[ $(/usr/bin/pbm list -o json | jq '.snapshots | length') -eq 0 ]] && /usr/bin/pbm backup --type={{ perconabackup_type }} &" # Make an initial backup
+{% endif %}
+
+StandardOutput=append:{{ perconabackup_log_path }}
+StandardError=append:{{ perconabackup_log_path }}
+
+[Install]
+WantedBy=multi-user.target

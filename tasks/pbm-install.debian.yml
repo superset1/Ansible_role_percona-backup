@@ -1,0 +1,43 @@
+---
+
+- name: Install PIP Modules
+  pip:
+    name: "{{ perconabackup_pip_requirements }}"
+  tags: [perconabackup, perconabackup-install]
+
+- name: Install Requirements
+  apt:
+    name:
+      - jq
+      - gnupg2
+      - lsb-release
+    state: present
+    update_cache: true
+  tags: [perconabackup, perconabackup-install]
+
+- name: Fetch Percona-Release Repository Package From Percona Web
+  get_url:
+    url: "{{ perconabackup_release_url }}"
+    dest: "/temp"
+  register: _perconabackup_release_deb_path
+  tags: [perconabackup, perconabackup-install]
+
+- name: Install Percona-Release Repository Package From Percona Web
+  apt:
+    deb: "{{ _perconabackup_release_deb_path.dest }}"
+    state: present
+    update_cache: true
+  tags: [perconabackup, perconabackup-install]
+
+- name: Enable Percona-Release Repository
+  shell: "percona-release show; percona-release enable pbm release"
+  changed_when: "'pbm - release' not in _perconabackup_release_enable_result.stdout"
+  register: _perconabackup_release_enable_result
+  tags: [perconabackup, perconabackup-install]
+
+- name: Install Percona Backup MongoDB
+  apt:
+    name: "percona-backup-mongodb={{ perconabackup_version }}*"
+    state: present
+    update_cache: true
+  tags: [perconabackup, perconabackup-install]

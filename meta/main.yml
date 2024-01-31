@@ -1,0 +1,44 @@
+---
+
+galaxy_info:
+  role_name: percona-backup
+  author: Vitaly Kargin
+  namespace: superset1
+  company: WB
+  description: Percona Backup for MongoDB (Use with superset1.mongodb for best experience)
+
+  license: MIT
+
+  min_ansible_version: 2.5
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+        - jammy
+    - name: Debian
+      versions:
+        - buster
+        - bullseye
+        - bookworm
+    - name: EL
+      versions:
+        - 7
+        - 8
+        - 9
+
+  galaxy_tags:
+    - backup
+    - mongodb
+    - percona
+    - cluster
+    - sharding
+    - database
+    - nosql
+    - s3
+
+collections:
+  - amazon.aws
+
+dependencies: []
