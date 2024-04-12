@@ -18,14 +18,14 @@
   tags: [perconabackup, perconabackup-validate, perconabackup-configure, perconabackup-install]
 
 
-- name: Check That 'perconabackup_storage_s3_config.endpoint' Variable Contains Scheme If 'perconabackup_storage_type == s3'
-  assert:
-    quiet: true
-    that:
-      -  perconabackup_storage_s3_config.endpoint | regex_search("^https?://.+$")
-    fail_msg: "Variable 'perconabackup_storage_s3_config.endpoint' must contain the http or https scheme!"
-  when: perconabackup_storage_type == 's3'
-  tags: [perconabackup, perconabackup-validate, perconabackup-configure, perconabackup-install]
+# - name: Check That 'perconabackup_storage_s3_config.endpoint' Variable Contains Scheme If 'perconabackup_storage_type == s3'
+#   assert:
+#     quiet: true
+#     that:
+#       -  perconabackup_storage_s3_config.endpoint | regex_search("^https?://.+$")
+#     fail_msg: "Variable 'perconabackup_storage_s3_config.endpoint' must contain the http or https scheme!"
+#   when: perconabackup_storage_type == 's3'
+#   tags: [perconabackup, perconabackup-validate, perconabackup-configure, perconabackup-install]
 
 - name: Check That 'perconabackup_storage_s3_config' Is Filled In Correctly
   assert:

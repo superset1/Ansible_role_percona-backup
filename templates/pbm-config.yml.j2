@@ -13,7 +13,7 @@ storage:
     region: {{ perconabackup_storage_s3_config.region }}
     bucket: {{ perconabackup_storage_s3_config.bucket }}
     prefix: {{ perconabackup_storage_s3_config.path }}
-    endpointUrl: {{ perconabackup_storage_s3_config.endpoint }}
+    endpointUrl: {{ perconabackup_storage_s3_config.endpoint if perconabackup_storage_s3_config.endpoint | regex_search("^https?://.+$") else perconabackup_storage_s3_config_endpoint_schema + '://' + perconabackup_storage_s3_config.endpoint}}
     credentials:
       access-key-id: {{ perconabackup_storage_s3_config.access_key }}
       secret-access-key: {{ perconabackup_storage_s3_config.secret_key }}

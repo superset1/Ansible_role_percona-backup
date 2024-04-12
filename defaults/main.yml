@@ -34,6 +34,7 @@ perconabackup_storage_s3_config: # Optional dict, when 'perconabackup_storage_ty
   secret_key: ""
   endpoint: ""
   debugLogLevels: "" # [Oprional] Enables S3 debug logging for different types of S3 requests: LogDebug, Signing, HTTPBody, RequestRetries, RequestErrors, EventStreamBody. To specify several event types, separate them by comma
+perconabackup_storage_s3_config_endpoint_schema: "https" # Default s3 endpoint schema
 # S3 Storage
 
 perconabackup_crontab_backup_enabled: true

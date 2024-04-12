@@ -6,11 +6,16 @@ See the [official page](https://docs.percona.com/percona-backup-mongodb/index.ht
 
 Content <!-- omit in toc -->
 ------------
+- [What's new](#whats-new)
 - [Supported MongoDB Versions](#supported-mongodb-versions)
 - [Make a Backup](#make-a-backup)
 - [Restore a Backup](#restore-a-backup)
 - [Other Commands](#other-commands)
 - [Notes and Problems](#notes-and-problems)
+
+## What's new
+
+1. Added default `perconabackup_storage_s3_config_endpoint_schema: "https"`
 
 ## Supported MongoDB Versions
 
@@ -64,6 +69,8 @@ More information on the [official page](https://docs.percona.com/percona-backup-
 12. [Make a fresh backup](#make-a-backup) to serve as the new base for future restores.
 
 ## Other Commands
+
+Full list of commands on the [official page](https://docs.percona.com/percona-backup-mongodb/reference/pbm-commands.html).
 
 1. In MongoDB:
 - `db.runCommand( { buildInfo: 1 } )` - get MongoDB version
