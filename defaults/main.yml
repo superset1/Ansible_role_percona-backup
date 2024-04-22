@@ -2,7 +2,7 @@
 
 perconabackup_enabled: true # Enable Percona Backup for MongoDB
 
-perconabackup_version: 2.3.1 # Version of Percona Backup for MongoDB
+perconabackup_version: "2.4.1" # Version of Percona Backup for MongoDB
 
 perconabackup_type: "{{ 'physical' if mongodb_percona is defined and mongodb_percona else 'logical' }}" # 'logical' - for MongoDB Community, 'physical' - for Percona Server Mongodb and MongoDB Community
 perconabackup_initial_backup: true # Make an initial backup immediately after installing Percona Backup for MongoDB. It's need for pitr. If false, wait for the crontab schedule.

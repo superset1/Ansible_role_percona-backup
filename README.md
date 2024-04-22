@@ -15,7 +15,7 @@ Content <!-- omit in toc -->
 
 ## What's new
 
-1. Added default `perconabackup_storage_s3_config_endpoint_schema: "https"`
+1. UP version to `perconabackup_version: "2.4.1"`
 
 ## Supported MongoDB Versions
 
